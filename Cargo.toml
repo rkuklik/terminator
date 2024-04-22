@@ -1,0 +1,40 @@
+[package]
+name = "terminator"
+description = "Formatter for pretty panics and errors"
+repository = "https://github.com/rkuklik/terminator"
+license = "MIT OR Apache-2.0"
+keywords = ["error", "backtrace"]
+categories = [
+  "rust-patterns",
+  "command-line-interface",
+  "development-tools::debugging",
+  "value-formatting",
+]
+edition = "2021"
+version = "0.0.0"
+authors = ["todo"]
+
+[lints.clippy]
+correctness = "deny"
+suspicious = "deny"
+perf = "deny"
+style = "deny"
+complexity = "warn"
+pedantic = "warn"
+
+module-name-repetitions = "allow"
+
+[lints.rust]
+missing-docs = "warn"
+
+[dependencies]
+anyhow = { version = "1" }
+backtrace = { version = "0.3", features = ["gimli-symbolize"] }
+owo-colors = { version = "4" }
+
+winnow = { version = "0.6", optional = true }
+#url = { version = "2", optional = true }
+
+[features]
+default = ["backtrace"]
+backtrace = ["winnow"]
