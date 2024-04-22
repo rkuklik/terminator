@@ -41,7 +41,7 @@ impl<'a> Location<'a> {
 
 impl Display for Bundle<'_, &'_ Location<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let theme = self.config().theme;
+        let theme = &self.config().theme;
         let Location { file, line } = *self.data();
         let file = file.style(theme.file);
         let line = line.style(theme.line);

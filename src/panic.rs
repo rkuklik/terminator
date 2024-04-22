@@ -40,7 +40,7 @@ impl Display for Bundle<'_, &'_ PanicInfo<'_>> {
             .or_else(|| payload.downcast_ref::<&str>().copied())
             .unwrap_or("<non string panic payload>");
 
-        let theme = config.theme;
+        let theme = &config.theme;
         let info = "The application panicked (crashed).".style(theme.header);
         let message = payload.style(theme.message);
         let location = self.data().location().map(Location::derived);

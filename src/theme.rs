@@ -4,7 +4,7 @@ use owo_colors::Style;
 macro_rules! theme {
     ($(#[$meta:meta] $name:ident),* $(,)?) => {
         /// Setting for appearance of `terminator` messages
-        #[derive(Debug, Copy, Clone, Default)]
+        #[derive(Debug, Clone, Default)]
         pub struct Theme {
             $(
             pub(crate) $name: Style,
