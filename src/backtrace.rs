@@ -17,7 +17,7 @@ mod display;
 mod filter;
 
 #[repr(transparent)]
-pub(crate) struct Backtrace<'a> {
+struct Backtrace<'a> {
     pub frames: Cell<Vec<Frame<'a>>>,
 }
 

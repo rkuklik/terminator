@@ -49,7 +49,7 @@ impl Display for Bundle<'_, &Cell<Vec<Frame<'_>>>> {
             }
         }
 
-        writeln!(f, "{:━^80}", " BACKTRACE ")?;
+        write!(f, "{:━^80}", " BACKTRACE ")?;
         if frames.is_empty() {
             return write!(f, "{:^80}", "<empty backtrace>");
         }
@@ -59,23 +59,23 @@ impl Display for Bundle<'_, &Cell<Vec<Frame<'_>>>> {
         for frame in frames {
             let delta = frame.index - next;
             if delta != 0 {
-                writeln!(
+                write!(
                     f,
-                    "{}",
+                    "\n{}",
                     config.bundle(Hidden {
                         buffer: &buffer,
                         count: delta
                     })
                 )?;
             }
-            writeln!(f, "{}", config.bundle(&frame))?;
+            write!(f, "\n{}", config.bundle(&frame))?;
             next = frame.index + 1;
         }
 
         if (last + 1) != next {
             write!(
                 f,
-                "{}",
+                "\n{}",
                 config.bundle(Hidden {
                     buffer: &buffer,
                     count: last - next

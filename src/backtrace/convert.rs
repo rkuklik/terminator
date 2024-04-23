@@ -77,9 +77,9 @@ impl<'a> Iterator for BacktraceParser<'a> {
             .copied()
             .unwrap_or("")
             .split_once("at ")
-            .map(|(_, location)| location.rsplitn(3, ':').skip(1))
-            .and_then(|mut it| Some((it.next()?.parse().ok()?, it.next().map(Cow::Borrowed)?)))
-            .map(|(line, file)| Location { file, line });
+            .and_then(|(_, location)| location.rsplit_once(':')?.0.rsplit_once(':'))
+            .map(|(file, line)| (Cow::Borrowed(file), line.parse().expect("`usize` line")))
+            .map(|(file, line)| Location { file, line });
         if location.is_some() {
             self.source.next();
         }
@@ -149,6 +149,10 @@ mod tests {
   23: _start
 ";
         let backtrace: Vec<_> = BacktraceParser::new(backtrace).collect();
-        assert_eq!(backtrace.len(), 24);
+        assert_eq!(
+            backtrace.len(),
+            24,
+            "Backtrace had wrong length {backtrace:#?}"
+        );
     }
 }
