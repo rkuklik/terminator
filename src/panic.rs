@@ -9,7 +9,6 @@ use std::panic::PanicInfo;
 
 use owo_colors::OwoColorize;
 
-use crate::backtrace::Backtrace;
 use crate::config::Bundle;
 use crate::location::Location;
 use crate::Config;
@@ -51,7 +50,6 @@ impl Display for Bundle<'_, &'_ PanicInfo<'_>> {
         writeln!(f, "Location: {location}")?;
 
         let backtrace = backtrace::Backtrace::new();
-        let backtrace: Backtrace = (&backtrace).into();
         write!(Indent::double(f), "\n{}", config.bundle(&backtrace))?;
         writeln!(f)
     }

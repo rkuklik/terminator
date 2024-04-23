@@ -8,7 +8,7 @@ use crate::location::Location;
 use super::Frame;
 
 /// Callback for filtering a vector of [`Frame`]s
-pub type FrameFilter = dyn Fn(&mut Vec<&Frame>) + Send + Sync + 'static;
+pub type FrameFilter = dyn Fn(&mut Vec<Frame>) + Send + Sync + 'static;
 
 impl Frame<'_> {
     pub(super) fn is_dependency_code(&self) -> bool {
@@ -79,16 +79,14 @@ impl Frame<'_> {
     }
 }
 
-fn runtime(frames: &mut Vec<&Frame>) {
+fn runtime(frames: &mut Vec<Frame>) {
     let top = frames
         .iter()
-        .copied()
         .rposition(Frame::is_post_panic_code)
         .map_or(0, |x| x + 1);
 
     let bottom = frames
         .iter()
-        .copied()
         .position(Frame::is_runtime_init_code)
         .unwrap_or(frames.len());
 
@@ -97,7 +95,7 @@ fn runtime(frames: &mut Vec<&Frame>) {
     frames.retain(|frame| range.contains(&frame.index()));
 }
 
-fn internal(frames: &mut Vec<&Frame>) {
+fn internal(frames: &mut Vec<Frame>) {
     frames.retain(|frame| !frame.is_internal_machinery());
 }
 

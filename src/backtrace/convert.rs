@@ -1,28 +1,14 @@
 use std::borrow::Cow;
-
-use winnow::ascii::dec_uint;
-use winnow::ascii::digit1;
-use winnow::ascii::line_ending;
-use winnow::ascii::space0;
-use winnow::ascii::till_line_ending;
-use winnow::combinator::delimited;
-use winnow::combinator::opt;
-use winnow::combinator::preceded;
-use winnow::combinator::repeat;
-use winnow::combinator::separated_pair;
-use winnow::combinator::seq;
-use winnow::combinator::terminated;
-use winnow::token::any;
-use winnow::token::take_until;
-use winnow::PResult;
-use winnow::Parser;
+use std::cell::Cell;
+use std::iter::Peekable;
+use std::str::Lines;
 
 use crate::location::Location;
 
 use super::Backtrace;
 use super::Frame;
 
-pub(super) struct StdBacktraceString(pub String);
+struct BacktraceString(String);
 
 impl From<&backtrace::Backtrace> for Backtrace<'_> {
     fn from(value: &backtrace::Backtrace) -> Self {
@@ -48,49 +34,65 @@ impl From<&backtrace::Backtrace> for Backtrace<'_> {
                 },
             })
             .collect();
-        Self { frames }
+        Self {
+            frames: Cell::new(frames),
+        }
     }
 }
 
-impl<'a> From<&'a StdBacktraceString> for Backtrace<'a> {
-    fn from(value: &'a StdBacktraceString) -> Self {
-        Self::parse.parse(&value.0).unwrap_or_default()
+impl<'a> From<&'a BacktraceString> for Backtrace<'a> {
+    fn from(value: &'a BacktraceString) -> Self {
+        let frames = BacktraceParser::new(&value.0).collect();
+        Self {
+            frames: Cell::new(frames),
+        }
     }
 }
 
-impl<'a> Backtrace<'a> {
-    fn parse(input: &mut &'a str) -> PResult<Self> {
-        repeat(0.., Frame::parse)
-            .parse_next(input)
-            .map(|frames| Self { frames })
+pub(super) struct BacktraceParser<'a> {
+    source: Peekable<Lines<'a>>,
+}
+
+impl<'a> BacktraceParser<'a> {
+    pub fn new(source: &'a str) -> Self {
+        Self {
+            source: source.lines().peekable(),
+        }
     }
 }
 
-impl<'a> Frame<'a> {
-    fn parse(input: &mut &'a str) -> PResult<Self> {
-        seq!(Frame {
-            index: delimited(space0, dec_uint, ": "),
-            name: till_line_ending
-                .map(Cow::Borrowed)
-                .map(Some),
-            _: line_ending,
-            location: opt(preceded((space0, "at "), Location::parse)),
+impl<'a> Iterator for BacktraceParser<'a> {
+    type Item = Frame<'a>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let (index, name) = self
+            .source
+            .next()?
+            .trim()
+            .split_once(": ")
+            .map(|(index, name)| (index.parse(), Cow::Borrowed(name)))
+            .map(|(index, name)| (index.expect("`usize` index"), Some(name)))?;
+        let location = self
+            .source
+            .peek()
+            .copied()
+            .unwrap_or("")
+            .split_once("at ")
+            .map(|(_, location)| location.rsplitn(3, ':').skip(1))
+            .and_then(|mut it| Some((it.next()?.parse().ok()?, it.next().map(Cow::Borrowed)?)))
+            .map(|(line, file)| Location { file, line });
+        if location.is_some() {
+            self.source.next();
+        }
+        Some(Self::Item {
+            index,
+            name,
+            location,
         })
-        .parse_next(input)
     }
-}
 
-impl<'a> Location<'a> {
-    fn parse(input: &mut &'a str) -> PResult<Self> {
-        terminated(
-            separated_pair(take_until(0.., ':'), any, dec_uint),
-            (':', digit1, line_ending),
-        )
-        .map(|(file, line)| Location {
-            file: Cow::Borrowed(file),
-            line,
-        })
-        .parse_next(input)
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let (lower, upper) = self.source.size_hint();
+        (lower / 2, upper)
     }
 }
 
@@ -146,7 +148,7 @@ mod tests {
   22: __libc_start_main
   23: _start
 ";
-        let backtrace = Backtrace::parse.parse(backtrace).expect("backtrace");
-        assert_eq!(backtrace.frames.len(), 24);
+        let backtrace: Vec<_> = BacktraceParser::new(backtrace).collect();
+        assert_eq!(backtrace.len(), 24);
     }
 }

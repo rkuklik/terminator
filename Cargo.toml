@@ -31,10 +31,3 @@ missing-docs = "warn"
 anyhow = { version = "1" }
 backtrace = { version = "0.3", features = ["gimli-symbolize"] }
 owo-colors = { version = "4" }
-
-winnow = { version = "0.6", optional = true }
-#url = { version = "2", optional = true }
-
-[features]
-default = ["backtrace"]
-backtrace = ["winnow"]

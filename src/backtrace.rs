@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::cell::Cell;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
@@ -15,9 +16,9 @@ mod convert;
 mod display;
 mod filter;
 
-#[derive(Debug, Default, Clone)]
+#[repr(transparent)]
 pub(crate) struct Backtrace<'a> {
-    pub(crate) frames: Vec<Frame<'a>>,
+    pub frames: Cell<Vec<Frame<'a>>>,
 }
 
 /// Representation of single frame in backtrace
