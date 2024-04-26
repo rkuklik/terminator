@@ -5,6 +5,7 @@ macro_rules! theme {
     ($(#[$meta:meta] $name:ident),* $(,)?) => {
         /// Setting for appearance of `terminator` messages
         #[derive(Debug, Clone, Default)]
+        #[must_use]
         pub struct Theme {
             $(
             pub(crate) $name: Style,
@@ -14,7 +15,7 @@ macro_rules! theme {
         impl Theme {
         $(
             #[$meta]
-            #[must_use]
+            #[inline]
             pub fn $name(mut self, style: Style) -> Self {
                 self.$name = style;
                 self
@@ -47,13 +48,11 @@ theme! {
 
 impl Theme {
     /// Creates a blank theme
-    #[must_use]
     pub fn new() -> Self {
         Self::dark()
     }
 
     /// Returns a theme for dark backgrounds. This is the default
-    #[must_use]
     pub fn dark() -> Self {
         Self {
             file: style().purple(),
@@ -69,7 +68,6 @@ impl Theme {
     }
 
     /// Returns a theme for light backgrounds
-    #[must_use]
     pub fn light() -> Self {
         Self {
             file: style().purple(),
