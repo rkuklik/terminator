@@ -16,15 +16,21 @@ pub use location::Location;
 pub use theme::Theme;
 pub use verbosity::Verbosity;
 
-
 mod backtrace;
 mod config;
 mod consts;
 mod error;
 mod indent;
 mod location;
+mod macros;
 mod panic;
 mod theme;
 mod verbosity;
+
+macros::cfg_compat!(
+    mod compat;
+    pub use compat::Compat;
+    pub use compat::ErrorCompat;
+);
 
 static GLOBAL_SETTINGS: OnceLock<Config> = OnceLock::new();

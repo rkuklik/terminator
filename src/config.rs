@@ -1,8 +1,4 @@
-use std::env::set_var;
-
 use crate::backtrace::FrameFilter;
-use crate::consts::BACKTRACE;
-use crate::consts::LIB_BACKTRACE;
 use crate::theme::Theme;
 use crate::Frame;
 use crate::InstallError;
@@ -30,7 +26,7 @@ impl<'a, T> Bundle<'a, T> {
     }
 }
 
-/// aaaah
+/// Configuratin influencing appearance of displayed messages
 #[must_use = "`Config` is useless unless used in panic hook or installed"]
 pub struct Config {
     pub(crate) filters: Vec<Box<FrameFilter>>,
@@ -49,6 +45,7 @@ impl Config {
     }
 
     /// Creates new [`Config`] with no settings altered
+    #[inline]
     pub fn blank() -> Self {
         Self {
             filters: Vec::new(),
@@ -58,10 +55,11 @@ impl Config {
         }
     }
 
-    /// Creates new [`Config`] with with sane defaults applied
+    /// Creates new [`Config`] with sane defaults applied
     ///
-    /// This registers builtin [`FrameFilter`]s and retreives [`Verbosity`]
+    /// This registers builtin [`FrameFilter`]s and retrieves [`Verbosity`]
     /// settings from environment.
+    #[inline]
     pub fn new() -> Self {
         Self {
             filters: Frame::default_filters(),
@@ -77,9 +75,8 @@ impl Config {
     ///
     /// This function will return an error if [`Config`] is already installed.
     #[allow(clippy::missing_panics_doc)]
+    #[inline]
     pub fn install(self) -> Result<&'static Self, InstallError> {
-        set_var(BACKTRACE, self.panic.as_env());
-        set_var(LIB_BACKTRACE, self.error.as_env());
         GLOBAL_SETTINGS
             .set(self)
             .map_err(|_| InstallError)
@@ -88,18 +85,21 @@ impl Config {
     }
 
     /// Set verbosity for panics
+    #[inline]
     pub fn panic_verbosity(mut self, verbosity: Verbosity) -> Self {
         self.panic = verbosity;
         self
     }
 
     /// Set verbosity for errors
+    #[inline]
     pub fn error_verbosity(mut self, verbosity: Verbosity) -> Self {
         self.error = verbosity;
         self
     }
 
     /// Set verbosity for both errors and panics
+    #[inline]
     pub fn verbosity(mut self, verbosity: Verbosity) -> Self {
         self.error = verbosity;
         self.panic = verbosity;
@@ -107,6 +107,7 @@ impl Config {
     }
 
     /// Add filter for backtrace filtering
+    #[inline]
     pub fn filter(mut self, filter: Box<FrameFilter>) -> Self {
         self.filters.push(filter);
         self
@@ -114,6 +115,7 @@ impl Config {
 }
 
 impl Default for Config {
+    #[inline]
     fn default() -> Self {
         Self::new()
     }

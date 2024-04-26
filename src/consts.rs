@@ -67,6 +67,7 @@ constified!(
     ],
     SYM_PREFIX_INTERNAL => &[
         "anyhow::",
+        "eyre::",
         "terminator::",
     ],
     FILE_PREFIXES_DEP => &[
