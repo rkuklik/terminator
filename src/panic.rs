@@ -10,9 +10,9 @@ use std::panic::PanicInfo;
 use owo_colors::OwoColorize;
 
 use crate::config::Bundle;
+use crate::indent::Indent;
 use crate::location::Location;
 use crate::Config;
-use crate::Indent;
 use crate::GLOBAL_SETTINGS;
 
 impl Config {
@@ -49,7 +49,7 @@ impl Display for Bundle<'_, &'_ PanicInfo<'_>> {
         writeln!(f, "Message:  {message}")?;
         writeln!(f, "Location: {location}")?;
 
-        let backtrace = backtrace::Backtrace::new();
+        let backtrace = std::backtrace::Backtrace::force_capture();
         write!(Indent::double(f), "\n{}", config.bundle(&backtrace))?;
         writeln!(f)
     }

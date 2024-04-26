@@ -1,18 +1,21 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 
+#[cfg(all(feature = "anyhow", feature = "eyre"))]
+#[rustfmt::skip]
+compile_error!(r#"Features `anyhow` and `eyre` are mutualy exclusive. Use feature `compat` to bridge between the two."#);
+
 use std::sync::OnceLock;
 
 pub use backtrace::Frame;
 pub use backtrace::FrameFilter;
 pub use config::Config;
 pub use error::InstallError;
-pub use error::PrettyError;
+pub use error::Terminator;
 pub use location::Location;
 pub use theme::Theme;
 pub use verbosity::Verbosity;
 
-pub(crate) use indent::Indent;
 
 mod backtrace;
 mod config;

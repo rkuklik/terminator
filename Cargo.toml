@@ -28,6 +28,14 @@ module-name-repetitions = "allow"
 missing-docs = "warn"
 
 [dependencies]
-anyhow = { version = "1" }
 #backtrace = { version = "0.3" }
 owo-colors = { version = "4" }
+
+anyhow = { version = "1", optional = true }
+eyre = { version = "0.6", optional = true }
+
+[features]
+default = []
+anyhow = ["dep:anyhow"]
+eyre = ["dep:eyre"]
+compat = ["dep:anyhow", "dep:eyre"]

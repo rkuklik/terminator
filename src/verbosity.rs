@@ -43,6 +43,7 @@ impl Verbosity {
             .and_then(Self::decode)
     }
 
+    #[allow(unused)]
     pub(crate) fn as_env(self) -> &'static str {
         match self {
             Self::Minimal => "0",
