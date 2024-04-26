@@ -3,6 +3,7 @@ use std::cell::Cell;
 use std::iter::Peekable;
 use std::str::Lines;
 
+use crate::consts::UNKNOWN;
 use crate::location::Location;
 
 use super::Backtrace;
@@ -10,6 +11,13 @@ use super::Frame;
 
 struct BacktraceString(String);
 
+impl<'a> From<Cell<Vec<Frame<'a>>>> for Backtrace<'a> {
+    fn from(value: Cell<Vec<Frame<'a>>>) -> Self {
+        Backtrace { frames: value }
+    }
+}
+
+#[cfg(feature = "backtrace")]
 impl From<&backtrace::Backtrace> for Backtrace<'_> {
     fn from(value: &backtrace::Backtrace) -> Self {
         let frames = value
@@ -69,8 +77,8 @@ impl<'a> Iterator for BacktraceParser<'a> {
             .next()?
             .trim()
             .split_once(": ")
-            .map(|(index, name)| (index.parse(), Cow::Borrowed(name)))
-            .map(|(index, name)| (index.expect("`usize` index"), Some(name)))?;
+            .map(|(index, name)| (index.parse().expect("`usize` index"), name))
+            .map(|(index, name)| (index, (name != UNKNOWN).then_some(Cow::Borrowed(name))))?;
         let location = self
             .source
             .peek()

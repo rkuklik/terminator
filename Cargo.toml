@@ -29,5 +29,5 @@ missing-docs = "warn"
 
 [dependencies]
 anyhow = { version = "1" }
-backtrace = { version = "0.3" }
+#backtrace = { version = "0.3" }
 owo-colors = { version = "4" }
