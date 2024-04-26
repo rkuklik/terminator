@@ -45,6 +45,7 @@ constified!(
         "_start",
         "__libc_start_main",
         "start_thread",
+        "<unknown>",
     ],
     SYM_PREFIX_PANIC => &[
         "_rust_begin_unwind",

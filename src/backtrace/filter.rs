@@ -90,7 +90,7 @@ fn runtime(frames: &mut Vec<Frame>) {
         .position(Frame::is_runtime_init_code)
         .unwrap_or(frames.len());
 
-    let range = top..=bottom;
+    let range = top..bottom;
 
     frames.retain(|frame| range.contains(&frame.index()));
 }
