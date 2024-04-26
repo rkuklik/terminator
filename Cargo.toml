@@ -11,8 +11,12 @@ categories = [
   "value-formatting",
 ]
 edition = "2021"
-version = "0.0.0"
-authors = ["todo"]
+version = "0.2.0-alpha"
+authors = ["Kuklík Radek <kuklik dot radek at centrum dot cz>"]
+
+[package.metadata.docs.rs]
+features = ["compat"]
+targets = []
 
 [lints.clippy]
 correctness = "deny"
