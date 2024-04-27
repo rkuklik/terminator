@@ -26,7 +26,7 @@ impl<'a, T> Bundle<'a, T> {
     }
 }
 
-/// Configuratin influencing appearance of displayed messages
+/// Configuration influencing appearance of displayed messages
 #[must_use = "`Config` is useless unless used in panic hook or installed"]
 pub struct Config {
     pub(crate) filters: Vec<Box<FrameFilter>>,

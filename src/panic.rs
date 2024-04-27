@@ -18,7 +18,7 @@ use crate::GLOBAL_SETTINGS;
 impl Config {
     /// Panic hook which references provided [`Config`]
     ///
-    /// This can be used as panic hook only when `&self` id `'static`
+    /// This can be used as panic hook only when `&self` is `'static`
     pub fn panic_hook(&self) -> impl Fn(&PanicInfo<'_>) + Sync + Send + '_ {
         |info| _ = write!(LineWriter::new(stderr()), "{}", self.bundle(info))
     }
