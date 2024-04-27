@@ -8,7 +8,8 @@ use std::ops::DerefMut;
 
 mod sealed {
     pub trait Sealed {}
-    impl<T> Sealed for T where T: super::ErrorCompat {}
+    impl Sealed for eyre::Report {}
+    impl Sealed for anyhow::Error {}
 }
 
 /// Error shim for use with [`Compat`]
@@ -31,7 +32,6 @@ impl ErrorCompat for eyre::Report {
 }
 
 /// Newtype wrapper for trait object based error types to implement [`Error`]
-#[cfg_attr(not(doc), repr(transparent))]
 pub struct Compat<T>(pub T)
 where
     T: ErrorCompat;
