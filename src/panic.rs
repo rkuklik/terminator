@@ -29,10 +29,10 @@ impl Config {
     }
 }
 
-impl Display for Bundle<'_, &'_ PanicInfo<'_>> {
+impl Display for Bundle<'_, &PanicInfo<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let config = self.config();
-        let payload = self.data().payload();
+        let config = self.config;
+        let payload = self.data.payload();
         let payload = payload
             .downcast_ref::<String>()
             .map(String::as_str)
@@ -42,7 +42,7 @@ impl Display for Bundle<'_, &'_ PanicInfo<'_>> {
         let theme = &config.theme;
         let info = "The application panicked (crashed).".style(theme.header);
         let message = payload.style(theme.message);
-        let location = self.data().location().map(Location::derived);
+        let location = self.data.location().map(Location::derived);
         let location = config.bundle(location.as_ref());
 
         writeln!(f, "{info}")?;

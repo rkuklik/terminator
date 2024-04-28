@@ -19,10 +19,9 @@ struct Hidden<'a> {
     count: usize,
 }
 
-impl Display for Bundle<'_, Hidden<'_>> {
+impl Display for Bundle<'_, &Hidden<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let config = self.config();
-        let Hidden { buffer, count } = *self.data();
+        let Hidden { buffer, count } = *self.data;
         let mut buffer = buffer.borrow_mut();
         buffer.clear();
         write!(
@@ -31,14 +30,14 @@ impl Display for Bundle<'_, Hidden<'_>> {
             plural = if count == 1 { "" } else { "s" },
             decorator = "⋮",
         )?;
-        write!(f, "{:^80}", buffer.style(config.theme.hidden))
+        write!(f, "{:^80}", buffer.style(self.config.theme.hidden))
     }
 }
 
 impl Display for Bundle<'_, &Backtrace<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let config = self.config();
-        let mut frames: Vec<_> = self.data().frames.replace(Vec::new());
+        let config = self.config;
+        let mut frames: Vec<_> = self.data.frames.replace(Vec::new());
 
         write!(f, "{:━^80}", " BACKTRACE ")?;
         if frames.is_empty() {
@@ -62,7 +61,7 @@ impl Display for Bundle<'_, &Backtrace<'_>> {
                 write!(
                     f,
                     "\n{}",
-                    config.bundle(Hidden {
+                    config.bundle(&Hidden {
                         buffer: &buffer,
                         count: delta
                     })
@@ -76,7 +75,7 @@ impl Display for Bundle<'_, &Backtrace<'_>> {
             write!(
                 f,
                 "\n{}",
-                config.bundle(Hidden {
+                config.bundle(&Hidden {
                     buffer: &buffer,
                     count: last - next
                 })
@@ -95,12 +94,12 @@ impl Display for Bundle<'_, &'_ backtrace::Backtrace> {
     }
 }
 
-impl Display for Bundle<'_, &'_ std::backtrace::Backtrace> {
+impl Display for Bundle<'_, &std::backtrace::Backtrace> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let backtrace = self.data().to_string();
+        let backtrace = self.data.to_string();
         let frames = BacktraceParser::new(&backtrace).collect();
         let cell = Cell::new(frames);
         let backtrace = Backtrace::from(cell);
-        Display::fmt(&self.config().bundle(&backtrace), f)
+        Display::fmt(&self.config.bundle(&backtrace), f)
     }
 }

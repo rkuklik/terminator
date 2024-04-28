@@ -6,23 +6,13 @@ use crate::Verbosity;
 use crate::GLOBAL_SETTINGS;
 
 pub(crate) struct Bundle<'a, T> {
-    config: &'a Config,
-    data: T,
+    pub config: &'a Config,
+    pub data: T,
 }
 
 impl Config {
     pub(crate) fn bundle<T>(&self, data: T) -> Bundle<'_, T> {
         Bundle { config: self, data }
-    }
-}
-
-impl<'a, T> Bundle<'a, T> {
-    pub fn config(&self) -> &Config {
-        self.config
-    }
-
-    pub fn data(&self) -> &T {
-        &self.data
     }
 }
 

@@ -70,10 +70,10 @@ impl Frame<'_> {
     }
 }
 
-impl Display for Bundle<'_, &'_ Frame<'_>> {
+impl Display for Bundle<'_, &Frame<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let config = self.config();
-        let frame = *self.data();
+        let config = self.config;
+        let frame = self.data;
         let (name, hash) = frame.symbolify();
 
         #[allow(clippy::obfuscated_if_else)]

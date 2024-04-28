@@ -39,20 +39,20 @@ impl<'a> Location<'a> {
     }
 }
 
-impl Display for Bundle<'_, &'_ Location<'_>> {
+impl Display for Bundle<'_, &Location<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let theme = &self.config().theme;
-        let Location { file, line } = *self.data();
+        let theme = &self.config.theme;
+        let Location { file, line } = self.data;
         let file = file.style(theme.file);
         let line = line.style(theme.line);
         write!(f, "{file}:{line}")
     }
 }
 
-impl Display for Bundle<'_, Option<&'_ Location<'_>>> {
+impl Display for Bundle<'_, Option<&Location<'_>>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        if let Some(location) = self.data() {
-            write!(f, "{}", self.config().bundle(*location))
+        if let Some(location) = self.data {
+            write!(f, "{}", self.config.bundle(location))
         } else {
             f.write_str(UNKNOWN)
         }
