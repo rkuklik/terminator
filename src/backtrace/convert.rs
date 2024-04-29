@@ -18,7 +18,7 @@ impl<'a> From<Cell<Vec<Frame<'a>>>> for Backtrace<'a> {
 }
 
 #[cfg(feature = "backtrace")]
-impl From<&backtrace::Backtrace> for Backtrace<'_> {
+impl From<&backtrace::Backtrace> for Backtrace<'static> {
     fn from(value: &backtrace::Backtrace) -> Self {
         let frames = value
             .frames()
@@ -109,7 +109,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parse_backtrace() {
+    fn full_backtrace() {
         let backtrace = "\
    0: anyhow::error::<impl anyhow::Error>::msg
              at /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/anyhow-1.0.81/src/error.rs:83:36
@@ -162,5 +162,49 @@ mod tests {
             24,
             "Backtrace had wrong length {backtrace:#?}"
         );
+    }
+
+    #[test]
+    fn plain_frame() {
+        let frame = "  20: main";
+        let mut parser = BacktraceParser::new(frame);
+        assert_eq!(
+            parser.next(),
+            Some(Frame {
+                index: 20,
+                name: Some(Cow::Borrowed("main")),
+                location: None
+            })
+        );
+        assert_eq!(parser.next(), None);
+        let frame = "  21: <unknown>";
+        let mut parser = BacktraceParser::new(frame);
+        assert_eq!(
+            parser.next(),
+            Some(Frame {
+                index: 21,
+                name: None,
+                location: None
+            })
+        );
+        assert_eq!(parser.next(), None);
+    }
+
+    #[test]
+    fn located_frame() {
+        let frame = "   6: aoc::main\n             at ./src/main.rs:46:18";
+        let mut parser = BacktraceParser::new(frame);
+        assert_eq!(
+            parser.next(),
+            Some(Frame {
+                index: 6,
+                name: Some(Cow::Borrowed("aoc::main")),
+                location: Some(Location {
+                    file: Cow::Borrowed("./src/main.rs"),
+                    line: 46
+                })
+            })
+        );
+        assert_eq!(parser.next(), None);
     }
 }

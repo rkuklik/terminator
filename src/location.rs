@@ -10,7 +10,7 @@ use crate::config::Bundle;
 use crate::consts::UNKNOWN;
 
 /// Filename and line corresponding to source file
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Location<'a> {
     pub(crate) file: Cow<'a, str>,
     pub(crate) line: u32,
