@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 use std::cell::Cell;
-use std::cmp::Ordering;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
@@ -30,18 +29,6 @@ pub struct Frame<'a> {
     index: usize,
     name: Option<Cow<'a, str>>,
     location: Option<Location<'a>>,
-}
-
-impl PartialOrd for Frame<'_> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for Frame<'_> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.index.cmp(&other.index)
-    }
 }
 
 impl Frame<'_> {
