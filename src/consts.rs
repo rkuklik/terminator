@@ -31,6 +31,7 @@ constified!(
     &[&str];
     SYM_PREFIX_DEP => &[
         "std::",
+        "alloc::",
         "core::",
         "backtrace::backtrace::",
         "_rust_begin_unwind",

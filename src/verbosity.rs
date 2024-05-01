@@ -26,7 +26,7 @@ impl Verbosity {
         })
     }
 
-    /// Retrieves [`Verbosity`] that should be used by errors based on environment
+    /// Retrieves [`Verbosity`] that should be used by errors (based on environment variables)
     pub fn error() -> Option<Self> {
         env::var_os(LIB_BACKTRACE)
             .or_else(|| env::var_os(BACKTRACE))
@@ -35,7 +35,7 @@ impl Verbosity {
             .and_then(Self::decode)
     }
 
-    /// Retrieves [`Verbosity`] that should be used by panics based on environment
+    /// Retrieves [`Verbosity`] that should be used by panics (based on environment variables)
     pub fn panic() -> Option<Self> {
         env::var_os(BACKTRACE)
             .as_deref()
