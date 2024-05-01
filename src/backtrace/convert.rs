@@ -18,8 +18,8 @@ impl<'a> From<Cell<Vec<Frame<'a>>>> for Backtrace<'a> {
 }
 
 #[cfg(feature = "backtrace")]
-impl From<&backtrace::Backtrace> for Backtrace<'static> {
-    fn from(value: &backtrace::Backtrace) -> Self {
+impl<'a> From<&'a backtrace::Backtrace> for Backtrace<'a> {
+    fn from(value: &'a backtrace::Backtrace) -> Self {
         let frames = value
             .frames()
             .iter()
@@ -34,7 +34,10 @@ impl From<&backtrace::Backtrace> for Backtrace<'static> {
                     .map(Cow::Owned),
                 location: if let (Some(file), Some(line)) = (symbol.filename(), symbol.lineno()) {
                     Some(Location {
-                        file: Cow::Owned(file.display().to_string()),
+                        file: match file.to_str() {
+                            Some(file) => Cow::Borrowed(file),
+                            None => Cow::Owned(file.display().to_string()),
+                        },
                         line,
                     })
                 } else {
