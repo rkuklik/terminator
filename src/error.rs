@@ -4,6 +4,7 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 use std::fmt::Write;
+use std::marker::PhantomData;
 
 use owo_colors::OwoColorize;
 
@@ -41,6 +42,8 @@ pub struct Terminator {
     inner: anyhow::Error,
     #[cfg(feature = "eyre")]
     inner: eyre::Report,
+    // force `Terminator` to not be `Send` and `Sync` (though this may be lifted)
+    phantom: PhantomData<*const ()>,
 }
 
 impl Debug for Terminator {
@@ -89,6 +92,7 @@ where
     fn from(value: E) -> Self {
         Self {
             inner: value.into(),
+            phantom: PhantomData,
         }
     }
 }
@@ -101,6 +105,7 @@ where
     fn from(value: E) -> Self {
         Self {
             inner: value.into(),
+            phantom: PhantomData,
         }
     }
 }
@@ -108,11 +113,12 @@ where
 #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
 impl<E> From<E> for Terminator
 where
-    E: Error + 'static,
+    E: Error + Send + Sync + 'static,
 {
     fn from(value: E) -> Self {
         Self {
             inner: value.into(),
+            phantom: PhantomData,
         }
     }
 }
