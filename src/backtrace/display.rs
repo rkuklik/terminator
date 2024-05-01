@@ -1,4 +1,3 @@
-use std::cell::Cell;
 use std::cell::RefCell;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -87,9 +86,9 @@ impl Display for Bundle<'_, &Backtrace<'_>> {
 }
 
 #[cfg(feature = "backtrace")]
-impl Display for Bundle<'_, &'_ backtrace::Backtrace> {
+impl Display for Bundle<'_, &backtrace::Backtrace> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let backtrace = Backtrace::from(*self.data());
+        let backtrace = Backtrace::from(self.data);
         Display::fmt(&self.config().bundle(&backtrace), f)
     }
 }
@@ -97,9 +96,7 @@ impl Display for Bundle<'_, &'_ backtrace::Backtrace> {
 impl Display for Bundle<'_, &std::backtrace::Backtrace> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let backtrace = self.data.to_string();
-        let frames = BacktraceParser::new(&backtrace).collect();
-        let cell = Cell::new(frames);
-        let backtrace = Backtrace::from(cell);
+        let backtrace: Backtrace = BacktraceParser::new(&backtrace).collect::<Vec<_>>().into();
         Display::fmt(&self.config.bundle(&backtrace), f)
     }
 }

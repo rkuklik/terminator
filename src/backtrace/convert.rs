@@ -11,6 +11,12 @@ use super::Frame;
 
 struct BacktraceString(String);
 
+impl<'a> From<Vec<Frame<'a>>> for Backtrace<'a> {
+    fn from(value: Vec<Frame<'a>>) -> Self {
+        Cell::new(value).into()
+    }
+}
+
 impl<'a> From<Cell<Vec<Frame<'a>>>> for Backtrace<'a> {
     fn from(value: Cell<Vec<Frame<'a>>>) -> Self {
         Backtrace { frames: value }
@@ -20,7 +26,7 @@ impl<'a> From<Cell<Vec<Frame<'a>>>> for Backtrace<'a> {
 #[cfg(feature = "backtrace")]
 impl<'a> From<&'a backtrace::Backtrace> for Backtrace<'a> {
     fn from(value: &'a backtrace::Backtrace) -> Self {
-        let frames = value
+        value
             .frames()
             .iter()
             .flat_map(backtrace::BacktraceFrame::symbols)
@@ -44,19 +50,14 @@ impl<'a> From<&'a backtrace::Backtrace> for Backtrace<'a> {
                     None
                 },
             })
-            .collect();
-        Self {
-            frames: Cell::new(frames),
-        }
+            .collect::<Vec<_>>()
+            .into()
     }
 }
 
 impl<'a> From<&'a BacktraceString> for Backtrace<'a> {
     fn from(value: &'a BacktraceString) -> Self {
-        let frames = BacktraceParser::new(&value.0).collect();
-        Self {
-            frames: Cell::new(frames),
-        }
+        BacktraceParser::new(&value.0).collect::<Vec<_>>().into()
     }
 }
 
