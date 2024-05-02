@@ -14,17 +14,13 @@ edition = "2021"
 version = "0.2.0-beta"
 authors = ["Kuklík Radek <kuklik dot radek at centrum dot cz>"]
 
-[package.metadata.docs.rs]
-features = ["compat"]
-targets = []
-
 [lints.clippy]
-correctness = "deny"
-suspicious = "deny"
-perf = "deny"
-style = "deny"
-complexity = "warn"
-pedantic = "warn"
+correctness = { level = "deny", priority = -1 }
+suspicious = { level = "deny", priority = -1 }
+perf = { level = "deny", priority = -1 }
+style = { level = "deny", priority = -1 }
+complexity = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
 
 module-name-repetitions = "allow"
 
@@ -43,3 +39,7 @@ default = []
 anyhow = ["dep:anyhow"]
 eyre = ["dep:eyre"]
 compat = ["dep:anyhow", "dep:eyre"]
+
+[package.metadata.docs.rs]
+features = ["compat"]
+targets = []
