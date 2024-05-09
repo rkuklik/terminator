@@ -28,9 +28,9 @@ module-name-repetitions = "allow"
 missing-docs = "warn"
 
 [dependencies]
-#backtrace = { version = "0.3" }
 owo-colors = { version = "4" }
 
+#backtrace = { version = "0.3", optional = true }
 anyhow = { version = "1", optional = true }
 eyre = { version = "0.6", optional = true }
 

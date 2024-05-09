@@ -34,16 +34,34 @@ impl<'a> Iterator for Chain<'a> {
     }
 }
 
+#[cfg(not(any(feature = "anyhow", feature = "eyre")))]
+type Inner = Box<dyn Error>;
+#[cfg(feature = "anyhow")]
+type Inner = anyhow::Error;
+#[cfg(feature = "eyre")]
+type Inner = eyre::Report;
+
 /// Why not use this in main function as `Error` value? It's so pretty :)
 pub struct Terminator {
-    #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
-    inner: Box<dyn Error>,
-    #[cfg(feature = "anyhow")]
-    inner: anyhow::Error,
-    #[cfg(feature = "eyre")]
-    inner: eyre::Report,
+    inner: Inner,
     // force `Terminator` to not be `Send` and `Sync` (though this may be lifted)
     phantom: PhantomData<*const ()>,
+}
+
+impl Terminator {
+    fn new(inner: Inner) -> Self {
+        Self {
+            inner,
+            phantom: PhantomData,
+        }
+    }
+
+    fn chain(&self) -> impl Iterator<Item = &(dyn Error + 'static)> {
+        #[cfg(any(feature = "anyhow", feature = "eyre"))]
+        return self.inner.chain();
+        #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
+        return Chain::new(&*self.inner as &dyn Error);
+    }
 }
 
 impl Debug for Terminator {
@@ -54,12 +72,7 @@ impl Debug for Terminator {
 
         let config = GLOBAL_SETTINGS.get_or_init(Config::new);
 
-        #[cfg(any(feature = "anyhow", feature = "eyre"))]
-        let errors = self.inner.chain();
-        #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
-        let errors = Chain::new(&*self.inner as &dyn Error);
-
-        for (index, error) in errors.enumerate() {
+        for (index, error) in self.chain().enumerate() {
             write!(f, "\n{:>4}: {}", index, error.style(config.theme.error))?;
         }
 
@@ -103,10 +116,7 @@ where
     E: Into<eyre::Report>,
 {
     fn from(value: E) -> Self {
-        Self {
-            inner: value.into(),
-            phantom: PhantomData,
-        }
+        Self::new(value.into())
     }
 }
 
@@ -116,10 +126,7 @@ where
     E: Error + Send + Sync + 'static,
 {
     fn from(value: E) -> Self {
-        Self {
-            inner: value.into(),
-            phantom: PhantomData,
-        }
+        Self::new(value.into())
     }
 }
 
