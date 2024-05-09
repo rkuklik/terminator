@@ -11,7 +11,7 @@ categories = [
   "value-formatting",
 ]
 edition = "2021"
-version = "0.2.0-beta"
+version = "0.2.0"
 authors = ["Kuklík Radek <kuklik dot radek at centrum dot cz>"]
 
 [lints.clippy]
@@ -26,6 +26,7 @@ module-name-repetitions = "allow"
 
 [lints.rust]
 missing-docs = "warn"
+unexpected-cfgs = "allow"
 
 [dependencies]
 owo-colors = { version = "4" }
