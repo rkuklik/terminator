@@ -100,3 +100,15 @@ impl Display for Bundle<'_, &std::backtrace::Backtrace> {
         Display::fmt(&self.config.bundle(&backtrace), f)
     }
 }
+
+impl Display for Bundle<'_, Option<&std::backtrace::Backtrace>> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        let backtrace = self.data.as_ref().map(ToString::to_string);
+        let backtrace: Backtrace = if let Some(ref backtrace) = backtrace {
+            BacktraceParser::new(backtrace).collect::<Vec<_>>().into()
+        } else {
+            Backtrace::default()
+        };
+        Display::fmt(&self.config.bundle(&backtrace), f)
+    }
+}

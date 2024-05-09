@@ -1,3 +1,5 @@
+use std::backtrace::Backtrace;
+use std::backtrace::BacktraceStatus;
 use std::error::Error;
 use std::fmt::Debug;
 use std::fmt::Display;
@@ -12,30 +14,26 @@ use crate::indent::Indent;
 use crate::Config;
 use crate::GLOBAL_SETTINGS;
 
+#[cfg(feature = "eyre")]
+mod eyreimpl;
 #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
-struct Chain<'a> {
-    next: Option<&'a (dyn Error + 'static)>,
-}
+mod stdimpl;
 
-#[cfg(not(any(feature = "anyhow", feature = "eyre")))]
-impl<'a> Chain<'a> {
-    pub fn new(head: &'a (dyn Error + 'static)) -> Self {
-        Chain { next: Some(head) }
+impl Config {
+    #[allow(clippy::unnecessary_wraps)]
+    pub(crate) fn post_install(&'static self) -> std::result::Result<&'static Self, InstallError> {
+        #[cfg(feature = "eyre")]
+        {
+            let constructor = eyreimpl::BacktraceHandler::configured;
+            eyre::set_hook(Box::new(move |_| Box::new(constructor(self))))
+                .map_err(|_| InstallError)?;
+        }
+        Ok(self)
     }
 }
 
 #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
-impl<'a> Iterator for Chain<'a> {
-    type Item = &'a (dyn Error + 'static);
-    fn next(&mut self) -> Option<Self::Item> {
-        let yielded = self.next?;
-        self.next = yielded.source();
-        Some(yielded)
-    }
-}
-
-#[cfg(not(any(feature = "anyhow", feature = "eyre")))]
-type Inner = Box<dyn Error>;
+type Inner = Box<stdimpl::DynError>;
 #[cfg(feature = "anyhow")]
 type Inner = anyhow::Error;
 #[cfg(feature = "eyre")]
@@ -57,10 +55,29 @@ impl Terminator {
     }
 
     fn chain(&self) -> impl Iterator<Item = &(dyn Error + 'static)> {
-        #[cfg(any(feature = "anyhow", feature = "eyre"))]
-        return self.inner.chain();
-        #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
-        return Chain::new(&*self.inner as &dyn Error);
+        self.inner.chain()
+    }
+
+    fn checked_capture(backtrace: &Backtrace) -> Option<&Backtrace> {
+        if backtrace.status() == BacktraceStatus::Captured {
+            Some(backtrace)
+        } else {
+            None
+        }
+    }
+
+    #[cfg(not(feature = "eyre"))]
+    fn backtrace(&self) -> Option<&Backtrace> {
+        Self::checked_capture(self.inner.backtrace())
+    }
+
+    #[cfg(feature = "eyre")]
+    fn backtrace(&self) -> Option<&std::backtrace::Backtrace> {
+        self.inner
+            .handler()
+            .downcast_ref::<eyreimpl::BacktraceHandler>()
+            .map(eyreimpl::BacktraceHandler::backtrace)
+            .and_then(Self::checked_capture)
     }
 }
 
@@ -76,18 +93,7 @@ impl Debug for Terminator {
             write!(f, "\n{:>4}: {}", index, error.style(config.theme.error))?;
         }
 
-        #[cfg(feature = "anyhow")]
-        let backtrace = self.inner.backtrace();
-        #[cfg(not(feature = "anyhow"))]
-        let backtrace = if config.selected_verbosity() == crate::verbosity::Verbosity::Minimal {
-            std::backtrace::Backtrace::disabled()
-        } else {
-            std::backtrace::Backtrace::force_capture()
-        };
-        #[cfg(not(feature = "anyhow"))]
-        let backtrace = &backtrace;
-
-        write!(Indent::double(f), "\n\n{}", config.bundle(backtrace))
+        write!(Indent::double(f), "\n\n{}", config.bundle(self.backtrace()))
     }
 }
 
@@ -97,23 +103,10 @@ impl Display for Terminator {
     }
 }
 
-#[cfg(feature = "anyhow")]
+#[cfg(any(feature = "anyhow", feature = "eyre"))]
 impl<E> From<E> for Terminator
 where
-    E: Into<anyhow::Error>,
-{
-    fn from(value: E) -> Self {
-        Self {
-            inner: value.into(),
-            phantom: PhantomData,
-        }
-    }
-}
-
-#[cfg(feature = "eyre")]
-impl<E> From<E> for Terminator
-where
-    E: Into<eyre::Report>,
+    E: Into<Inner>,
 {
     fn from(value: E) -> Self {
         Self::new(value.into())

@@ -17,6 +17,7 @@ mod display;
 mod filter;
 
 /// Type to smuggle mutable vector to display impl and enable trait impls. One-time use.
+#[derive(Default)]
 struct Backtrace<'a> {
     frames: Cell<Vec<Frame<'a>>>,
 }

@@ -1,4 +1,8 @@
+use std::env;
+
 use crate::backtrace::FrameFilter;
+use crate::consts::BACKTRACE;
+use crate::consts::LIB_BACKTRACE;
 use crate::theme::Theme;
 use crate::Frame;
 use crate::InstallError;
@@ -8,12 +12,6 @@ use crate::GLOBAL_SETTINGS;
 pub(crate) struct Bundle<'a, T> {
     pub config: &'a Config,
     pub data: T,
-}
-
-impl Config {
-    pub(crate) fn bundle<T>(&self, data: T) -> Bundle<'_, T> {
-        Bundle { config: self, data }
-    }
 }
 
 /// Configuration influencing appearance of displayed messages
@@ -26,6 +24,10 @@ pub struct Config {
 }
 
 impl Config {
+    pub(crate) fn bundle<T>(&self, data: T) -> Bundle<'_, T> {
+        Bundle { config: self, data }
+    }
+
     pub(crate) fn selected_verbosity(&self) -> Verbosity {
         if std::thread::panicking() {
             self.panic
@@ -67,11 +69,14 @@ impl Config {
     #[allow(clippy::missing_panics_doc)]
     #[inline]
     pub fn install(self) -> Result<&'static Self, InstallError> {
+        env::set_var(BACKTRACE, self.panic.as_env());
+        env::set_var(LIB_BACKTRACE, self.error.as_env());
         GLOBAL_SETTINGS
             .set(self)
             .map_err(|_| InstallError)
             .map(|()| GLOBAL_SETTINGS.get().expect("`OnceLock` was just set"))
             .inspect(|config| std::panic::set_hook(Box::new(config.panic_hook())))
+            .and_then(Self::post_install)
     }
 
     /// Set verbosity for panics
