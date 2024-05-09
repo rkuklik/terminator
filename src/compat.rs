@@ -21,13 +21,13 @@ pub trait ErrorCompat: Debug + Display + sealed::Sealed {
 
 impl ErrorCompat for anyhow::Error {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.chain().next()
+        self.chain().skip(1).next()
     }
 }
 
 impl ErrorCompat for eyre::Report {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.chain().next()
+        self.chain().skip(1).next()
     }
 }
 
