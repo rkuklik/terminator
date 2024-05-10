@@ -32,7 +32,7 @@ impl<'a> Iterator for Chain<'a> {
 // the helper, implement traits and methods directly on this (ie. no generics).
 pub type DynError = ErrorUnsizingHelper<dyn Error + 'static>;
 
-// NOTE: `DynError` has to have generic (not directly error = dyn Error + 'static),
+// NOTE: `DynError` has to have generic helper (not directly error = dyn Error + 'static),
 // because it is almost impossible to create instance of unsized structs directly.
 pub struct ErrorUnsizingHelper<E: ?Sized> {
     backtrace: Backtrace,

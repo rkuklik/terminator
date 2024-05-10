@@ -1,5 +1,4 @@
 use std::backtrace::Backtrace;
-use std::backtrace::BacktraceStatus;
 use std::error::Error;
 use std::fmt::Debug;
 use std::fmt::Display;
@@ -18,19 +17,6 @@ use crate::GLOBAL_SETTINGS;
 mod eyreimpl;
 #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
 mod stdimpl;
-
-impl Config {
-    #[allow(clippy::unnecessary_wraps)]
-    pub(crate) fn post_install(&'static self) -> std::result::Result<&'static Self, InstallError> {
-        #[cfg(feature = "eyre")]
-        {
-            let constructor = eyreimpl::BacktraceHandler::configured;
-            eyre::set_hook(Box::new(move |_| Box::new(constructor(self))))
-                .map_err(|_| InstallError)?;
-        }
-        Ok(self)
-    }
-}
 
 #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
 type Inner = Box<stdimpl::DynError>;
@@ -58,26 +44,22 @@ impl Terminator {
         self.inner.chain()
     }
 
-    fn checked_capture(backtrace: &Backtrace) -> Option<&Backtrace> {
-        if backtrace.status() == BacktraceStatus::Captured {
+    #[cfg(not(feature = "eyre"))]
+    fn backtrace(&self) -> Option<&Backtrace> {
+        let backtrace = self.inner.backtrace();
+        if backtrace.status() == std::backtrace::BacktraceStatus::Captured {
             Some(backtrace)
         } else {
             None
         }
     }
 
-    #[cfg(not(feature = "eyre"))]
-    fn backtrace(&self) -> Option<&Backtrace> {
-        Self::checked_capture(self.inner.backtrace())
-    }
-
     #[cfg(feature = "eyre")]
-    fn backtrace(&self) -> Option<&std::backtrace::Backtrace> {
+    fn backtrace(&self) -> Option<&Backtrace> {
         self.inner
             .handler()
             .downcast_ref::<eyreimpl::BacktraceHandler>()
-            .map(eyreimpl::BacktraceHandler::backtrace)
-            .and_then(Self::checked_capture)
+            .and_then(eyreimpl::BacktraceHandler::backtrace)
     }
 }
 
@@ -103,7 +85,17 @@ impl Display for Terminator {
     }
 }
 
-#[cfg(any(feature = "anyhow", feature = "eyre"))]
+#[cfg(feature = "anyhow")]
+impl<E> From<E> for Terminator
+where
+    E: Into<Inner>,
+{
+    fn from(value: E) -> Self {
+        Self::new(value.into())
+    }
+}
+
+#[cfg(feature = "eyre")]
 impl<E> From<E> for Terminator
 where
     E: Into<Inner>,

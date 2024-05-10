@@ -1,4 +1,5 @@
 use std::env;
+use std::panic;
 
 use crate::backtrace::FrameFilter;
 use crate::consts::BACKTRACE;
@@ -69,14 +70,16 @@ impl Config {
     #[allow(clippy::missing_panics_doc)]
     #[inline]
     pub fn install(self) -> Result<&'static Self, InstallError> {
-        env::set_var(BACKTRACE, self.panic.as_env());
-        env::set_var(LIB_BACKTRACE, self.error.as_env());
-        GLOBAL_SETTINGS
+        env::set_var(BACKTRACE, self.panic.env());
+        env::set_var(LIB_BACKTRACE, self.error.env());
+        let config = GLOBAL_SETTINGS
             .set(self)
             .map_err(|_| InstallError)
-            .map(|()| GLOBAL_SETTINGS.get().expect("`OnceLock` was just set"))
-            .inspect(|config| std::panic::set_hook(Box::new(config.panic_hook())))
-            .and_then(Self::post_install)
+            .map(|()| GLOBAL_SETTINGS.get().expect("`OnceLock` was just set"))?;
+        panic::set_hook(Box::new(config.panic_hook()));
+        #[cfg(feature = "eyre")]
+        eyre::set_hook(config.eyre_hook()).map_err(|_| InstallError)?;
+        Ok(config)
     }
 
     /// Set verbosity for panics

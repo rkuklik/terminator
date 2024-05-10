@@ -11,20 +11,24 @@ use crate::Config;
 use crate::Verbosity;
 
 pub struct BacktraceHandler {
-    backtrace: Backtrace,
+    backtrace: Option<Backtrace>,
+}
+
+type Handler = dyn Fn(&(dyn Error + 'static)) -> Box<dyn EyreHandler> + Sync + Send + 'static;
+
+impl Config {
+    pub(crate) fn eyre_hook(&'static self) -> Box<Handler> {
+        Box::new(move |_| {
+            Box::new(BacktraceHandler {
+                backtrace: (self.error != Verbosity::Minimal).then(Backtrace::force_capture),
+            })
+        })
+    }
 }
 
 impl BacktraceHandler {
-    pub fn configured(config: &Config) -> Self {
-        Self {
-            backtrace: (config.error == Verbosity::Minimal)
-                .then(Backtrace::disabled)
-                .unwrap_or_else(Backtrace::force_capture),
-        }
-    }
-
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.backtrace
+    pub fn backtrace(&self) -> Option<&Backtrace> {
+        self.backtrace.as_ref()
     }
 }
 
