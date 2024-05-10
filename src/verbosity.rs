@@ -43,7 +43,7 @@ impl Verbosity {
             .and_then(Self::decode)
     }
 
-    pub(crate) fn as_env(self) -> &'static str {
+    pub(crate) fn env(self) -> &'static str {
         match self {
             Self::Minimal => "0",
             Self::Medium => "1",

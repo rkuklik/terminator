@@ -78,3 +78,19 @@ impl<T: ErrorCompat> DerefMut for Compat<T> {
         &mut self.0
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    static MSG: &str = "some random error";
+
+    #[test]
+    fn conversions() {
+        let anyhow_error = anyhow::Error::msg(MSG);
+        let eyre_error = eyre::Report::msg(MSG);
+        let eyre: eyre::Report = Compat(anyhow_error).into();
+        let anyhow: anyhow::Error = Compat(eyre_error).into();
+        assert_eq!(eyre.to_string(), anyhow.to_string());
+    }
+}

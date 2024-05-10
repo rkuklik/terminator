@@ -22,12 +22,21 @@ mod consts;
 mod error;
 mod indent;
 mod location;
-mod macros;
 mod panic;
 mod theme;
 mod verbosity;
 
-macros::cfg_compat!(
+macro_rules! cfg_compat {
+    ($($item:item)*) => {
+        $(
+        #[cfg(feature = "compat")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "compat")))]
+        $item
+        )*
+    };
+}
+
+cfg_compat!(
     mod compat;
     pub use compat::Compat;
     pub use compat::ErrorCompat;

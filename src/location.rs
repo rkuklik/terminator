@@ -52,7 +52,7 @@ impl Display for Bundle<'_, &Location<'_>> {
 impl Display for Bundle<'_, Option<&Location<'_>>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         if let Some(location) = self.data {
-            write!(f, "{}", self.config.bundle(location))
+            Display::fmt(&self.config.bundle(location), f)
         } else {
             f.write_str(UNKNOWN)
         }
