@@ -13,21 +13,21 @@ pub type FrameFilter = dyn Fn(&mut Vec<Frame>) + Send + Sync + 'static;
 impl Frame<'_> {
     pub(super) fn is_dependency_code(&self) -> bool {
         // Inspect name.
-        if let Some(ref name) = self.name {
-            if SYM_PREFIX_DEP.iter().copied().any(prefixes(name)) {
-                return true;
-            }
+        let Some(name) = self.name.as_deref() else {
+            return true;
+        };
+        if SYM_PREFIX_DEP.iter().copied().any(prefixes(name)) {
+            return true;
         }
 
         // Inspect filename.
-        if let Some(ref location) = self.location {
-            let filename = location.file();
+        if let Some(filename) = self.location.as_ref().map(Location::file) {
             if FILE_PREFIXES_DEP.iter().copied().any(prefixes(filename))
                 || filename.contains("/.cargo/registry/src/")
             {
                 return true;
             }
-        }
+        };
 
         false
     }
@@ -48,7 +48,7 @@ impl Frame<'_> {
     /// Heuristically determine whether a frame is likely to be part of language
     /// runtime.
     fn is_runtime_init_code(&self) -> bool {
-        let (Some(name), Some(file)) = (
+        let (Some(name), file) = (
             self.name.as_ref(),
             self.location.as_ref().map(Location::file),
         ) else {
@@ -60,7 +60,7 @@ impl Frame<'_> {
         }
 
         // For Linux, this is the best rule for skipping test init I found.
-        if name == "{{closure}}" && file == "src/libtest/lib.rs" {
+        if name == "{{closure}}" && file.is_some_and(|file| file == "src/libtest/lib.rs") {
             return true;
         }
 
