@@ -6,6 +6,7 @@ use crate::consts::LIB_BACKTRACE;
 
 /// Setting for backtrace details
 #[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
+#[non_exhaustive]
 pub enum Verbosity {
     /// No backtrace will be collected
     #[default]
@@ -43,7 +44,10 @@ impl Verbosity {
             .and_then(Self::decode)
     }
 
-    pub(crate) fn env(self) -> &'static str {
+    /// Shows environment name corresponding to provided [`Verbosity`]
+    #[must_use]
+    #[inline]
+    pub fn env(self) -> &'static str {
         match self {
             Self::Minimal => "0",
             Self::Medium => "1",
