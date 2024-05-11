@@ -40,34 +40,22 @@ By default, `Terminator` should look like:
 
 <pre>
 Error:
-   0: <span class="err">alright, I'll show myself out with pretty formatting and a fancy backtrace</span>
-   1: <span class="err">it is pretty nasty, let's send it back to caller</span>
-   2: <span class="err">an error is never late, nor is it early, it arrives precisely when it means to</span>
-   3: <span class="err">wild error has appeared</span>
+   0: <span style="color: red">alright, I'm done, show yourself out with pretty formatting and a fancy backtrace</span>
+   1: <span style="color: red">it is pretty nasty, let's send it back to caller</span>
+   2: <span style="color: red">an error is never late, nor is it early, it arrives precisely when it means to</span>
+   3: <span style="color: red">wild error has appeared</span>
 
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                <span class="hid">⋮ 5 frames hidden ⋮</span>
-   2: <span class="sym">example::module::function</span>
-      at <span class="loc">./src/example.rs</span>:<span class="loc">25</span>
-   3: <span class="dep">core::ops::function::FnOnce::call_once</span>
-      at <span class="loc">/rustc/hash/library/core/src/ops/function.rs</span>:<span class="loc">250</span>
-   4: <span class="sym">&lt;F as example::Eval&lt;A&gt;&gt;::eval</span>
-      at <span class="loc">./src/lib.rs</span>:<span class="loc">20</span>
-   5: <span class="sym">example::main</span>
-      at <span class="loc">./src/main.rs</span>:<span class="loc">25</span>
-   6: <span class="dep">core::ops::function::FnOnce::call_once</span>
-      at <span class="loc">/rustc/hash/library/core/src/ops/function.rs</span>:<span class="loc">250</span>
-                                <span class="hid">⋮ 15 frames hidden ⋮</span>
+                                <span style="color: cyan">⋮ 5 frames hidden ⋮</span>
+   2: <span style="color: red">example::module::function</span>
+      at <span style="color: pink">./src/example.rs</span>:<span style="color: pink">25</span>
+   3: <span style="color: lime">core::ops::function::FnOnce::call_once</span>
+      at <span style="color: pink">/rustc/hash/library/core/src/ops/function.rs</span>:<span style="color: pink">250</span>
+   4: <span style="color: red">&lt;F as example::Eval&lt;A&gt;&gt;::eval</span>
+      at <span style="color: pink">./src/lib.rs</span>:<span style="color: pink">20</span>
+   5: <span style="color: red">example::main</span>
+      at <span style="color: pink">./src/main.rs</span>:<span style="color: pink">25</span>
+   6: <span style="color: lime">core::ops::function::FnOnce::call_once</span>
+      at <span style="color: pink">/rustc/hash/library/core/src/ops/function.rs</span>:<span style="color: pink">250</span>
+                                <span style="color: cyan">⋮ 15 frames hidden ⋮</span>
 </pre>
-<style>
-        .err,
-        .sym {
-          color: red;
-        }
-        .hid {
-          color: cyan;
-        }
-        .dep {
-          color: lime;
-        }
-</style>
