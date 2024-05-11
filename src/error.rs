@@ -28,7 +28,7 @@ type Inner = eyre::Report;
 /// Why not use this in main function as `Error` value? It's so pretty :)
 pub struct Terminator {
     inner: Inner,
-    // force `Terminator` to not be `Send` and `Sync` (though this may be lifted)
+    // force `Terminator` not to be `Send` and `Sync` (though this may be lifted)
     phantom: PhantomData<*const ()>,
 }
 
@@ -44,7 +44,12 @@ impl Terminator {
         self.inner.chain()
     }
 
-    #[cfg(not(feature = "eyre"))]
+    #[cfg(not(any(feature = "anyhow", feature = "eyre")))]
+    fn backtrace(&self) -> Option<&Backtrace> {
+        self.inner.backtrace()
+    }
+
+    #[cfg(feature = "anyhow")]
     fn backtrace(&self) -> Option<&Backtrace> {
         let backtrace = self.inner.backtrace();
         if backtrace.status() == std::backtrace::BacktraceStatus::Captured {
@@ -121,7 +126,7 @@ pub struct InstallError;
 
 impl Display for InstallError {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "`Config` was already installed globally")
+        f.write_str("`Config` was already installed globally")
     }
 }
 

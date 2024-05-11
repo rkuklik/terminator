@@ -35,13 +35,13 @@ pub type DynError = ErrorUnsizingHelper<dyn Error + 'static>;
 // NOTE: `DynError` has to have generic helper (not directly error = dyn Error + 'static),
 // because it is almost impossible to create instance of unsized structs directly.
 pub struct ErrorUnsizingHelper<E: ?Sized> {
-    backtrace: Backtrace,
+    backtrace: Option<Backtrace>,
     error: E,
 }
 
 impl DynError {
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.backtrace
+    pub fn backtrace(&self) -> Option<&Backtrace> {
+        self.backtrace.as_ref()
     }
 }
 
@@ -77,8 +77,8 @@ where
         let backtrace = GLOBAL_SETTINGS
             .get()
             .map(Config::selected_verbosity)
-            .and_then(|verbosity| (verbosity == Verbosity::Minimal).then(Backtrace::disabled))
-            .unwrap_or_else(Backtrace::force_capture);
+            .map_or(true, |verbosity| verbosity != Verbosity::Minimal)
+            .then(Backtrace::force_capture);
         let error = ErrorUnsizingHelper {
             backtrace,
             error: value,
