@@ -4,8 +4,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 
-use owo_colors::OwoColorize;
-
 use crate::config::Bundle;
 use crate::consts::UNKNOWN;
 use crate::location::Location;
@@ -74,17 +72,18 @@ impl Frame<'_> {
 impl Display for Bundle<'_, &Frame<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let config = self.config;
+        let theme = &config.theme;
         let frame = self.data;
         let (name, hash) = frame.symbolify();
 
         #[allow(clippy::obfuscated_if_else)]
         let name = frame
             .is_dependency_code()
-            .then_some(config.theme.dependency)
-            .unwrap_or(config.theme.package)
+            .then_some(theme.dependency)
+            .unwrap_or(theme.package)
             .style(name);
         let hash = hash.unwrap_or("");
-        let hash = hash.style(config.theme.hash);
+        let hash = theme.hash.style(hash);
         let location = config.bundle(frame.location.as_ref());
 
         write!(f, "{:>2}: {name}{hash}\n    at {location}", frame.index)

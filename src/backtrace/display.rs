@@ -4,8 +4,6 @@ use std::fmt::Formatter;
 use std::fmt::Result;
 use std::fmt::Write;
 
-use owo_colors::OwoColorize;
-
 use crate::config::Bundle;
 use crate::verbosity::Verbosity;
 
@@ -29,7 +27,7 @@ impl Display for Bundle<'_, &Hidden<'_>> {
             plural = if count == 1 { "" } else { "s" },
             decorator = "⋮",
         )?;
-        write!(f, "{:^80}", buffer.style(self.config.theme.hidden))
+        write!(f, "{:^80}", self.config.theme.hidden.style(buffer.as_str()))
     }
 }
 

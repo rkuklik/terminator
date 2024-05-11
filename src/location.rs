@@ -4,8 +4,6 @@ use std::fmt::Formatter;
 use std::fmt::Result;
 use std::panic;
 
-use owo_colors::OwoColorize;
-
 use crate::config::Bundle;
 use crate::consts::UNKNOWN;
 
@@ -43,8 +41,8 @@ impl Display for Bundle<'_, &Location<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let theme = &self.config.theme;
         let Location { file, line } = self.data;
-        let file = file.style(theme.file);
-        let line = line.style(theme.line);
+        let file = theme.file.style(&**file);
+        let line = theme.line.style(*line);
         write!(f, "{file}:{line}")
     }
 }

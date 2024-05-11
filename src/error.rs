@@ -7,8 +7,6 @@ use std::fmt::Result;
 use std::fmt::Write;
 use std::marker::PhantomData;
 
-use owo_colors::OwoColorize;
-
 use crate::indent::Indent;
 use crate::Config;
 use crate::GLOBAL_SETTINGS;
@@ -77,7 +75,7 @@ impl Debug for Terminator {
         let config = GLOBAL_SETTINGS.get_or_init(Config::new);
 
         for (index, error) in self.chain().enumerate() {
-            write!(f, "\n{:>4}: {}", index, error.style(config.theme.error))?;
+            write!(f, "\n{:>4}: {}", index, config.theme.error.style(error))?;
         }
 
         write!(Indent::double(f), "\n\n{}", config.bundle(self.backtrace()))

@@ -7,8 +7,6 @@ use std::io::LineWriter;
 use std::io::Write;
 use std::panic::PanicInfo;
 
-use owo_colors::OwoColorize;
-
 use crate::config::Bundle;
 use crate::indent::Indent;
 use crate::location::Location;
@@ -40,8 +38,8 @@ impl Display for Bundle<'_, &PanicInfo<'_>> {
             .unwrap_or("<non string panic payload>");
 
         let theme = &config.theme;
-        let info = "The application panicked (crashed).".style(theme.header);
-        let message = payload.style(theme.message);
+        let info = theme.header.style("The application panicked (crashed).");
+        let message = theme.message.style(payload);
         let location = self.data.location().map(Location::derived);
         let location = config.bundle(location.as_ref());
 
