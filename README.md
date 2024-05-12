@@ -36,7 +36,7 @@ Following flags are provided:
 
 ## Appearance
 
-By default, `Terminator` should look like:
+By default, `Terminator` should look like the following (you should see colors)
 
 <pre>
 Error:
@@ -46,7 +46,7 @@ Error:
    3: <span style="color: red">wild error has appeared</span>
 
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                                <span style="color: cyan">⋮ 5 frames hidden ⋮</span>
+                                <span style="color: cyan">⋮ 2 frames hidden ⋮</span>
    2: <span style="color: red">example::module::function</span>
       at <span style="color: pink">./src/example.rs</span>:<span style="color: pink">25</span>
    3: <span style="color: lime">core::ops::function::FnOnce::call_once</span>

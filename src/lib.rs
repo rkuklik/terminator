@@ -13,6 +13,9 @@ pub use config::Config;
 pub use error::InstallError;
 pub use error::Terminator;
 pub use location::Location;
+pub use theme::Color;
+pub use theme::Effect;
+pub use theme::Style;
 pub use theme::Theme;
 pub use verbosity::Verbosity;
 

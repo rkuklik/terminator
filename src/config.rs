@@ -1,5 +1,6 @@
 use std::env;
 use std::panic;
+use std::thread;
 
 use crate::backtrace::FrameFilter;
 use crate::consts::BACKTRACE;
@@ -30,7 +31,7 @@ impl Config {
     }
 
     pub(crate) fn selected_verbosity(&self) -> Verbosity {
-        if std::thread::panicking() {
+        if thread::panicking() {
             self.panic
         } else {
             self.error
