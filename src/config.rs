@@ -105,6 +105,13 @@ impl Config {
         self
     }
 
+    /// Set [`Theme`] as appearance
+    #[inline]
+    pub fn theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
+        self
+    }
+
     /// Add filter for backtrace filtering
     #[inline]
     pub fn filter(mut self, filter: Box<FrameFilter>) -> Self {

@@ -102,6 +102,10 @@ struct Colors {
 }
 
 impl Colors {
+    const fn new() -> Self {
+        Self { fg: None, bg: None }
+    }
+
     const fn fg(mut self, color: Color) -> Self {
         self.fg = Some(color);
         self
@@ -131,6 +135,10 @@ struct Effects {
 }
 
 impl Effects {
+    const fn new() -> Self {
+        Self { bytes: 0 }
+    }
+
     const fn set(mut self, effect: Effect) -> Self {
         self.bytes |= 1 << effect as u16;
         self
@@ -161,8 +169,11 @@ pub struct Style {
 impl Style {
     /// Creates new empty style
     #[inline]
-    pub fn new() -> Self {
-        Self::default()
+    pub const fn new() -> Self {
+        Self {
+            colors: Colors::new(),
+            effects: Effects::new(),
+        }
     }
 
     /// Sets foreground [`Color`]
@@ -179,14 +190,14 @@ impl Style {
         self
     }
 
-    /// Adds [text effect](Effect)
+    /// Adds [`Effect`]
     #[inline]
     pub const fn set(mut self, effect: Effect) -> Self {
         self.effects = self.effects.set(effect);
         self
     }
 
-    /// Removes [text effect](Effect)
+    /// Removes [`Effect`]
     #[inline]
     pub const fn unset(mut self, effect: Effect) -> Self {
         self.effects = self.effects.unset(effect);
@@ -253,7 +264,7 @@ macro_rules! theme {
         $(
             #[$meta]
             #[inline]
-            pub fn $name(mut self, style: Style) -> Self {
+            pub const fn $name(mut self, style: Style) -> Self {
                 self.$name = style;
                 self
             }
@@ -284,13 +295,31 @@ theme! {
 }
 
 impl Theme {
-    /// Creates a blank theme
-    pub fn new() -> Self {
+    /// Creates a blank field
+    #[inline]
+    pub const fn blank() -> Self {
+        Self {
+            file: Style::new(),
+            line: Style::new(),
+            error: Style::new(),
+            dependency: Style::new(),
+            package: Style::new(),
+            hash: Style::new(),
+            header: Style::new(),
+            message: Style::new(),
+            hidden: Style::new(),
+        }
+    }
+
+    /// Creates a default theme
+    #[inline]
+    pub const fn new() -> Self {
         Self::dark()
     }
 
     /// Returns a theme for dark backgrounds. This is the default
-    pub fn dark() -> Self {
+    #[inline]
+    pub const fn dark() -> Self {
         Self {
             file: Style::new().fg(Color::Magenta),
             line: Style::new().fg(Color::Magenta),
@@ -305,7 +334,8 @@ impl Theme {
     }
 
     /// Returns a theme for light backgrounds
-    pub fn light() -> Self {
+    #[inline]
+    pub const fn light() -> Self {
         Self {
             file: Style::new().fg(Color::Magenta),
             line: Style::new().fg(Color::Magenta),
