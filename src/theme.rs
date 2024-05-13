@@ -5,6 +5,7 @@ macro_rules! color {
         /// Color setting for text and background
         #[derive(Debug, Clone, Copy)]
         #[must_use]
+        #[non_exhaustive]
         #[cfg_attr(not(doc), repr(u8))]
         pub enum Color {
             $(
@@ -66,6 +67,7 @@ macro_rules! effect {
         /// Effect setting for text and background
         #[derive(Debug, Clone, Copy)]
         #[must_use]
+        #[non_exhaustive]
         #[cfg_attr(not(doc), repr(u8))]
         pub enum Effect {
             $(
@@ -75,6 +77,8 @@ macro_rules! effect {
         }
 
         impl Effect {
+            const ALL: [Self; 9] = [$(Self::$name,)*];
+
             const fn ansi(self) -> &'static str {
                 match self {
                     $(
@@ -82,20 +86,12 @@ macro_rules! effect {
                     )*
                 }
             }
-
-            const fn new(byte: u8) -> Option<Self> {
-                match byte {
-                    $(
-                    $num => Some(Self::$name),
-                    )*
-                    0 | 10.. => None,
-                }
-            }
         }
     };
 }
 
 #[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
 struct Colors {
     fg: Option<Color>,
     bg: Option<Color>,
@@ -161,6 +157,7 @@ impl Effects {
 /// Appearance setting for text
 #[derive(Debug, Clone, Copy, Default)]
 #[must_use]
+#[non_exhaustive]
 pub struct Style {
     colors: Colors,
     effects: Effects,
@@ -228,9 +225,8 @@ impl<T: fmt::Display> fmt::Display for Styled<T> {
             let colors = [colors.fg.map(Color::fg), colors.bg.map(Color::bg)]
                 .into_iter()
                 .flatten();
-            let effects = (1..=9)
-                .map(Effect::new)
-                .map(|effect| effect.expect("effect is valid"))
+            let effects = Effect::ALL
+                .into_iter()
                 .filter_map(|effect| effects.get(effect))
                 .map(Effect::ansi);
             for (index, code) in colors.chain(effects).enumerate() {
@@ -254,8 +250,10 @@ macro_rules! theme {
         /// Setting for appearance of `terminator` messages
         #[derive(Debug, Clone, Default)]
         #[must_use]
+        #[non_exhaustive]
         pub struct Theme {
             $(
+            #[$meta]
             pub(crate) $name: Style,
             )*
         }
