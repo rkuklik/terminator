@@ -62,6 +62,29 @@ color! {
     BrightWhite   97 107,
 }
 
+#[derive(Debug, Clone, Copy, Default)]
+#[non_exhaustive]
+struct Colors {
+    fg: Option<Color>,
+    bg: Option<Color>,
+}
+
+impl Colors {
+    const fn new() -> Self {
+        Self { fg: None, bg: None }
+    }
+
+    const fn fg(mut self, color: Color) -> Self {
+        self.fg = Some(color);
+        self
+    }
+
+    const fn bg(mut self, color: Color) -> Self {
+        self.bg = Some(color);
+        self
+    }
+}
+
 macro_rules! effect {
     ($($name:ident $num:literal),* $(,)?) => {
         /// Effect setting for text and background
@@ -88,29 +111,6 @@ macro_rules! effect {
             }
         }
     };
-}
-
-#[derive(Debug, Clone, Copy, Default)]
-#[non_exhaustive]
-struct Colors {
-    fg: Option<Color>,
-    bg: Option<Color>,
-}
-
-impl Colors {
-    const fn new() -> Self {
-        Self { fg: None, bg: None }
-    }
-
-    const fn fg(mut self, color: Color) -> Self {
-        self.fg = Some(color);
-        self
-    }
-
-    const fn bg(mut self, color: Color) -> Self {
-        self.bg = Some(color);
-        self
-    }
 }
 
 effect! {
@@ -145,12 +145,8 @@ impl Effects {
         self
     }
 
-    const fn get(self, effect: Effect) -> Option<Effect> {
-        if (self.bytes >> effect as u16) & 1 == 1 {
-            Some(effect)
-        } else {
-            None
-        }
+    const fn get(self, effect: Effect) -> bool {
+        (self.bytes >> effect as u16) & 1 == 1
     }
 }
 
@@ -222,12 +218,13 @@ impl<T: fmt::Display> fmt::Display for Styled<T> {
 
         if meta {
             f.write_str("\x1b[")?;
-            let colors = [colors.fg.map(Color::fg), colors.bg.map(Color::bg)]
+            let colors = [colors.fg, colors.bg]
                 .into_iter()
-                .flatten();
+                .zip([Color::fg, Color::bg])
+                .filter_map(|(color, extractor)| color.map(extractor));
             let effects = Effect::ALL
                 .into_iter()
-                .filter_map(|effect| effects.get(effect))
+                .filter(|effect| effects.get(*effect))
                 .map(Effect::ansi);
             for (index, code) in colors.chain(effects).enumerate() {
                 if index != 0 {
@@ -237,7 +234,7 @@ impl<T: fmt::Display> fmt::Display for Styled<T> {
             }
             f.write_str("m")?;
         }
-        fmt::Display::fmt(&thing, f)?;
+        fmt::Display::fmt(thing, f)?;
         if meta {
             f.write_str("\x1b[0m")?;
         }
