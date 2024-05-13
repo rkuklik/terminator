@@ -52,6 +52,7 @@ impl Frame<'_> {
         self.location.as_ref()
     }
 
+    #[cfg(feature = "backtrace")]
     fn symbolify(&self) -> (&str, Option<&str>) {
         let Some(name) = self.name() else {
             return (UNKNOWN, None);
@@ -66,6 +67,11 @@ impl Frame<'_> {
         } else {
             (name, None)
         }
+    }
+
+    #[cfg(not(feature = "backtrace"))]
+    fn symbolify(&self) -> (&str, Option<&str>) {
+        (self.name().unwrap_or(UNKNOWN), None)
     }
 }
 

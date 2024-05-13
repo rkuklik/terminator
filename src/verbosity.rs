@@ -18,13 +18,14 @@ pub enum Verbosity {
 }
 
 impl Verbosity {
-    fn decode(thing: &[u8]) -> Option<Self> {
-        Some(match thing {
+    fn decode(thing: &[u8]) -> Self {
+        #[allow(clippy::match_same_arms)]
+        match thing {
             b"0" => Verbosity::Minimal,
             b"1" => Verbosity::Medium,
             b"full" => Verbosity::Full,
-            _ => return None,
-        })
+            _ => Verbosity::Medium,
+        }
     }
 
     /// Retrieves [`Verbosity`] that should be used by errors (based on environment variables)
@@ -33,7 +34,7 @@ impl Verbosity {
             .or_else(|| env::var_os(BACKTRACE))
             .as_deref()
             .map(OsStr::as_encoded_bytes)
-            .and_then(Self::decode)
+            .map(Self::decode)
     }
 
     /// Retrieves [`Verbosity`] that should be used by panics (based on environment variables)
@@ -41,13 +42,13 @@ impl Verbosity {
         env::var_os(BACKTRACE)
             .as_deref()
             .map(OsStr::as_encoded_bytes)
-            .and_then(Self::decode)
+            .map(Self::decode)
     }
 
     /// Shows environment name corresponding to provided [`Verbosity`]
     #[must_use]
     #[inline]
-    pub fn env(self) -> &'static str {
+    pub const fn env(self) -> &'static str {
         match self {
             Self::Minimal => "0",
             Self::Medium => "1",
