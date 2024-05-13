@@ -1,5 +1,9 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
+//! ## Appearance
+//!
+//! By default, `Terminator` should look like the following
+#![doc = include_str!("../backtrace.html")]
 
 #[cfg(all(feature = "anyhow", feature = "eyre"))]
 #[rustfmt::skip]
