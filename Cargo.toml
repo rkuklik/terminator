@@ -11,7 +11,7 @@ categories = [
   "value-formatting",
 ]
 edition = "2021"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Kuklík Radek <kuklik dot radek at centrum dot cz>"]
 
 [lints.clippy]
