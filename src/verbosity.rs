@@ -18,7 +18,7 @@ pub enum Verbosity {
 }
 
 impl Verbosity {
-    fn decode(thing: &[u8]) -> Self {
+    const fn decode(thing: &[u8]) -> Self {
         #[allow(clippy::match_same_arms)]
         match thing {
             b"0" => Verbosity::Minimal,
@@ -29,6 +29,7 @@ impl Verbosity {
     }
 
     /// Retrieves [`Verbosity`] that should be used by errors (based on environment variables)
+    #[must_use]
     pub fn error() -> Option<Self> {
         env::var_os(LIB_BACKTRACE)
             .or_else(|| env::var_os(BACKTRACE))
@@ -38,6 +39,7 @@ impl Verbosity {
     }
 
     /// Retrieves [`Verbosity`] that should be used by panics (based on environment variables)
+    #[must_use]
     pub fn panic() -> Option<Self> {
         env::var_os(BACKTRACE)
             .as_deref()
