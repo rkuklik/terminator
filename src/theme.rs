@@ -6,7 +6,6 @@ macro_rules! color {
         #[derive(Debug, Clone, Copy)]
         #[must_use]
         #[non_exhaustive]
-        #[cfg_attr(not(doc), repr(u8))]
         pub enum Color {
             $(
             #[allow(missing_docs)]
@@ -91,7 +90,6 @@ macro_rules! effect {
         #[derive(Debug, Clone, Copy)]
         #[must_use]
         #[non_exhaustive]
-        #[cfg_attr(not(doc), repr(u8))]
         pub enum Effect {
             $(
             #[allow(missing_docs)]

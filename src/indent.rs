@@ -38,12 +38,12 @@ where
                 self.requires = true;
             }
 
-            if self.requires {
-                // Don't render the line unless its actually got text on it
-                if line.is_empty() {
-                    continue;
-                }
+            // Don't render the line unless its actually got text on it
+            if line.is_empty() {
+                continue;
+            }
 
+            if self.requires {
                 self.writer.write_str(self.indentation)?;
                 self.requires = false;
             }
