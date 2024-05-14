@@ -1,6 +1,5 @@
 use std::fmt::Result;
 use std::fmt::Write;
-use std::num::NonZeroUsize;
 
 pub struct Indent<'a, F>
 where
@@ -8,6 +7,7 @@ where
 {
     indentation: &'a str,
     writer: &'a mut F,
+    requires: bool,
 }
 
 impl<'a, F> Indent<'a, F>
@@ -18,6 +18,7 @@ where
         Self {
             indentation,
             writer,
+            requires: true,
         }
     }
 
@@ -31,25 +32,25 @@ where
     F: Write + ?Sized,
 {
     fn write_str(&mut self, s: &str) -> Result {
-        let Self {
-            indentation,
-            writer,
-        } = self;
-        let mut start = None;
-        for index in s
-            .match_indices('\n')
-            .map(|(index, _)| index)
-            .chain(Some(s.len()))
-        {
-            let begin = start.map_or(0, NonZeroUsize::get);
-            let line = &s[begin..index];
-            let (newline, indentation) = match start {
-                None => ("", ""),
-                Some(_) => ("\n", *indentation),
-            };
-            write!(writer, "{newline}{indentation}{line}")?;
-            start = NonZeroUsize::new(index + 1);
+        for (ind, line) in s.split('\n').enumerate() {
+            if ind > 0 {
+                self.writer.write_char('\n')?;
+                self.requires = true;
+            }
+
+            if self.requires {
+                // Don't render the line unless its actually got text on it
+                if line.is_empty() {
+                    continue;
+                }
+
+                self.writer.write_str(self.indentation)?;
+                self.requires = false;
+            }
+
+            self.writer.write_str(line)?;
         }
+
         Ok(())
     }
 }
