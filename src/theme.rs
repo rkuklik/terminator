@@ -139,7 +139,7 @@ impl Effects {
     }
 
     const fn unset(mut self, effect: Effect) -> Self {
-        self.bytes |= 0 << effect as u16;
+        self.bytes &= !(1 << effect as u16);
         self
     }
 
@@ -340,5 +340,40 @@ impl Theme {
             message: Style::new().fg(Color::Blue),
             hidden: Style::new().fg(Color::Blue),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    impl Effects {
+        fn contains(self, effect: Effect) -> Self {
+            assert!(self.get(effect));
+            self
+        }
+
+        fn lacks(self, effect: Effect) -> Self {
+            assert!(!self.get(effect));
+            self
+        }
+    }
+
+    #[test]
+    fn effect() {
+        let bold = Effect::Bold;
+        let strike = Effect::Strikethrough;
+        Effects::new()
+            .lacks(bold)
+            .unset(bold)
+            .lacks(bold)
+            .set(bold)
+            .contains(bold)
+            .set(strike)
+            .contains(bold)
+            .contains(strike)
+            .unset(bold)
+            .contains(strike)
+            .lacks(bold);
     }
 }

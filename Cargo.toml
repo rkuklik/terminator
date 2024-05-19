@@ -27,6 +27,7 @@ module-name-repetitions = "allow"
 [lints.rust]
 missing-docs = "warn"
 unexpected-cfgs = "allow"
+unsafe-code = "deny"
 
 [dependencies]
 #backtrace = { version = "0.3", optional = true }
