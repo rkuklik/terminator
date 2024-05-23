@@ -7,29 +7,31 @@ use std::ops::Deref;
 use std::ops::DerefMut;
 
 mod sealed {
-    pub trait Sealed {}
-    impl Sealed for eyre::Report {}
-    impl Sealed for anyhow::Error {}
+    use std::error::Error;
+
+    pub trait Sealed {
+        #[doc(hidden)]
+        /// The lower-level source of this error, if any
+        fn source(&self) -> Option<&(dyn Error + 'static)>;
+    }
+    impl Sealed for eyre::Report {
+        fn source(&self) -> Option<&(dyn Error + 'static)> {
+            self.chain().nth(1)
+        }
+    }
+    impl Sealed for anyhow::Error {
+        fn source(&self) -> Option<&(dyn Error + 'static)> {
+            self.chain().nth(1)
+        }
+    }
 }
 
 /// Error shim for use with [`Compat`]
-pub trait ErrorCompat: Debug + Display + sealed::Sealed {
-    #[doc(hidden)]
-    /// The lower-level source of this error, if any
-    fn source(&self) -> Option<&(dyn Error + 'static)>;
-}
+pub trait ErrorCompat: Debug + Display + sealed::Sealed {}
 
-impl ErrorCompat for anyhow::Error {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.chain().nth(1)
-    }
-}
+impl ErrorCompat for anyhow::Error {}
 
-impl ErrorCompat for eyre::Report {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        self.chain().nth(1)
-    }
-}
+impl ErrorCompat for eyre::Report {}
 
 /// Newtype wrapper for trait object based error types to implement [`Error`]
 pub struct Compat<T>(pub T)
@@ -50,7 +52,7 @@ impl<T: ErrorCompat> Display for Compat<T> {
 
 impl<T: ErrorCompat> Error for Compat<T> {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        ErrorCompat::source(&self.0)
+        sealed::Sealed::source(&self.0)
     }
 }
 
