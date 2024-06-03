@@ -89,8 +89,8 @@ impl Display for Bundle<'_, &Frame<'_>> {
             .unwrap_or(theme.package)
             .style(name);
         let hash = hash.unwrap_or("");
-        let hash = theme.hash.style(hash);
-        let location = config.bundle(frame.location.as_ref());
+        //let hash = theme.hash.style(hash);
+        let location = config.bundle(frame.location());
 
         write!(f, "{:>2}: {name}{hash}\n    at {location}", frame.index)
     }

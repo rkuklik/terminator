@@ -254,14 +254,14 @@ macro_rules! theme {
         }
 
         impl Theme {
-        $(
+            $(
             #[$meta]
             #[inline]
             pub const fn $name(mut self, style: Style) -> Self {
                 self.$name = style;
                 self
             }
-        )*
+            )*
         }
     };
 }
@@ -288,7 +288,7 @@ theme! {
 }
 
 impl Theme {
-    /// Creates a blank field
+    /// Creates a blank theme
     #[inline]
     pub const fn blank() -> Self {
         Self {

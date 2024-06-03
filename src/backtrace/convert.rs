@@ -173,25 +173,25 @@ mod tests {
         let frame = "  20: main";
         let mut parser = BacktraceParser::new(frame);
         assert_eq!(
-            parser.next(),
-            Some(Frame {
+            parser.next().unwrap(),
+            Frame {
                 index: 20,
                 name: Some(Cow::Borrowed("main")),
                 location: None
-            })
+            }
         );
-        assert_eq!(parser.next(), None);
+        assert!(parser.next().is_none());
         let frame = "  21: <unknown>";
         let mut parser = BacktraceParser::new(frame);
         assert_eq!(
-            parser.next(),
-            Some(Frame {
+            parser.next().unwrap(),
+            Frame {
                 index: 21,
                 name: None,
                 location: None
-            })
+            }
         );
-        assert_eq!(parser.next(), None);
+        assert!(parser.next().is_none());
     }
 
     #[test]
@@ -199,16 +199,16 @@ mod tests {
         let frame = "   6: aoc::main\n             at ./src/main.rs:46:18";
         let mut parser = BacktraceParser::new(frame);
         assert_eq!(
-            parser.next(),
-            Some(Frame {
+            parser.next().unwrap(),
+            Frame {
                 index: 6,
                 name: Some(Cow::Borrowed("aoc::main")),
                 location: Some(Location {
                     file: Cow::Borrowed("./src/main.rs"),
                     line: 46
                 })
-            })
+            }
         );
-        assert_eq!(parser.next(), None);
+        assert!(parser.next().is_none());
     }
 }

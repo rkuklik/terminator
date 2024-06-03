@@ -40,9 +40,9 @@ impl<'a> Location<'a> {
 impl Display for Bundle<'_, &Location<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let theme = &self.config.theme;
-        let Location { file, line } = self.data;
-        let file = theme.file.style(&**file);
-        let line = theme.line.style(*line);
+        let location = self.data;
+        let file = theme.file.style(location.file());
+        let line = theme.line.style(location.line());
         write!(f, "{file}:{line}")
     }
 }

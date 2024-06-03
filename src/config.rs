@@ -2,12 +2,12 @@ use std::env;
 use std::panic;
 use std::thread;
 
-use crate::backtrace::FrameFilter;
 use crate::consts::BACKTRACE;
 use crate::consts::LIB_BACKTRACE;
-use crate::theme::Theme;
 use crate::Frame;
+use crate::FrameFilter;
 use crate::InstallError;
+use crate::Theme;
 use crate::Verbosity;
 use crate::GLOBAL_SETTINGS;
 
