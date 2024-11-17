@@ -5,7 +5,7 @@ use std::fmt::Write as _;
 use std::io::stderr;
 use std::io::LineWriter;
 use std::io::Write;
-use std::panic::PanicInfo;
+use std::panic::PanicHookInfo;
 
 use crate::config::Bundle;
 use crate::indent::Indent;
@@ -17,17 +17,17 @@ impl Config {
     /// Panic hook which references provided [`Config`]
     ///
     /// This can be used as panic hook only when `&self` is `'static`
-    pub fn panic_hook(&self) -> impl Fn(&PanicInfo<'_>) + Sync + Send + '_ {
+    pub fn panic_hook(&self) -> impl Fn(&PanicHookInfo<'_>) + Sync + Send + '_ {
         |info| _ = write!(LineWriter::new(stderr()), "{}", self.bundle(info))
     }
 
     /// Panic hook which lazily retrieves [`Config`] from global settings.
-    pub fn lazy_panic_hook() -> impl Fn(&PanicInfo<'_>) + Sync + Send + 'static {
+    pub fn lazy_panic_hook() -> impl Fn(&PanicHookInfo<'_>) + Sync + Send + 'static {
         |info| GLOBAL_SETTINGS.get_or_init(Self::default).panic_hook()(info)
     }
 }
 
-impl Display for Bundle<'_, &PanicInfo<'_>> {
+impl Display for Bundle<'_, &PanicHookInfo<'_>> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         let config = self.config;
         let payload = self.data.payload();

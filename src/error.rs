@@ -5,7 +5,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 use std::fmt::Write;
-use std::marker::PhantomData;
 
 use crate::indent::Indent;
 use crate::Config;
@@ -26,16 +25,11 @@ type Inner = eyre::Report;
 /// Why not use this in main function as `Error` value? It's so pretty :)
 pub struct Terminator {
     inner: Inner,
-    // force `Terminator` not to be `Send` and `Sync` (though this may be lifted)
-    phantom: PhantomData<*const ()>,
 }
 
 impl Terminator {
     fn new(inner: Inner) -> Self {
-        Self {
-            inner,
-            phantom: PhantomData,
-        }
+        Self { inner }
     }
 
     fn chain(&self) -> impl Iterator<Item = &(dyn Error + 'static)> {

@@ -11,8 +11,8 @@ categories = [
   "value-formatting",
 ]
 edition = "2021"
-version = "0.3.1"
-authors = ["Kuklík Radek <kuklik dot radek at centrum dot cz>"]
+version = "0.3.2"
+authors = ["Kuklík Radek"]
 
 [lints.clippy]
 correctness = { level = "deny", priority = -1 }

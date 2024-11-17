@@ -30,7 +30,7 @@ impl<'a> Iterator for Chain<'a> {
 
 // HACK: can't be declared directly, see three lines below. In order to not misuse
 // the helper, implement traits and methods directly on this (ie. no generics).
-pub type DynError = ErrorUnsizingHelper<dyn Error + 'static>;
+pub type DynError = ErrorUnsizingHelper<dyn Error + Send + Sync + 'static>;
 
 // NOTE: `DynError` has to have generic helper (not directly error = dyn Error + 'static),
 // because it is almost impossible to create instance of unsized structs directly.
@@ -71,7 +71,7 @@ impl Error for DynError {
 
 impl<E> From<E> for Box<DynError>
 where
-    E: Error + 'static,
+    E: Error + Send + Sync + 'static,
 {
     fn from(value: E) -> Self {
         let backtrace = GLOBAL_SETTINGS
@@ -83,6 +83,6 @@ where
             backtrace,
             error: value,
         };
-        Box::new(error) as Self
+        Box::new(error)
     }
 }
